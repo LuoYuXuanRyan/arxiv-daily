@@ -27,7 +27,7 @@ brew install pandoc   # macOS (Homebrew)
 cp .env.example .env  # (after you create it or copy from this README)
 
 # 5. Run once
-python main.py
+uv run python main.py
 ```
 
 If everything is configured correctly you should see logs in `./logs/app.log`, a generated Markdown file in `./temp/`, (optionally) a PDF, and an email in your inbox.
@@ -141,7 +141,7 @@ Cache file shape:
 
 ```bash
 source .venv/bin/activate
-python main.py
+uv run python main.py
 ```
 
 Exit codes:
@@ -186,6 +186,16 @@ jobs:
     daily:
         name: Fetch & Recommend Papers
         runs-on: ubuntu-latest
+        env:
+            TZ: Asia/Shanghai
+            PYTHONUNBUFFERED: '1'
+            LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+            SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+            EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+            EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS }}
+            SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+            SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+            SMTP_PORT: ${{ secrets.SMTP_PORT }}
         permissions:
             contents: read
             actions: read
@@ -219,14 +229,6 @@ jobs:
                   ls -al
 
             - name: Run daily script
-              env:
-                  LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-                  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-                  EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
-                  EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS }}
-                  SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-                  SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
-                  SMTP_PORT: ${{ secrets.SMTP_PORT }}
               run: |
                   echo "Running arxiv daily workflow..."
                   uv run python main.py
@@ -361,7 +363,7 @@ You should see a JSON string. If you get network / auth errors, verify `LLM_API_
 
 ## Attribution
 
-Built with: arXiv API (`arxiv` Python lib), OpenAI‑compatible chat API client, Pandoc (optional).
+Built with: arXiv API (`arxiv` Python lib), OpenAI‑compatible chat API client, Pandoc.
 
 ---
 
