@@ -1,0 +1,19 @@
+[project]
+name = "arxiv-daily"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "arxiv>=2.2.0",
+    "openai>=2.1.0",
+    "python-dotenv>=1.1.1",
+]
+
+[tool.arxiv_daily.app]
+timezone = "Asia/Shanghai"
+query = "cat:cs.LG"
+research_interests = ["Retrieval-Augmented Generation, RAG", "LLM for Recommendation", "Graph RAG", "Table RAG", "Agent", "Agentic RAG"]
+max_results = 10
+llm_base_url = "https://api.deepseek.com"
+llm_model_name = "deepseek-chat"

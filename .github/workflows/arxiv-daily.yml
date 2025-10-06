@@ -1,0 +1,99 @@
+name: Arxiv Daily
+
+on:
+    schedule:
+        # 00:00 UTC -> 08:00 Asia/Shanghai
+        - cron: '0 0 * * *'
+    workflow_dispatch: {}
+
+concurrency:
+    group: arxiv-daily
+    cancel-in-progress: false
+
+env:
+    TZ: Asia/Shanghai
+    PYTHONUNBUFFERED: '1'
+
+jobs:
+    daily:
+        name: Fetch & Recommend Papers
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+
+            - name: Install uv (fast Python dependency resolver)
+              uses: astral-sh/setup-uv@v3
+
+            - name: Sync dependencies via uv
+              run: |
+                  uv sync --no-dev
+
+            - name: Install Pandoc & LaTeX (pdflatex)
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y pandoc texlive-latex-base texlive-latex-recommended texlive-fonts-recommended
+                  pandoc --version
+
+            - name: Prepare runtime folders
+              run: |
+                  mkdir -p logs temp
+                  ls -al
+
+            - name: Run daily script
+              env:
+                  LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+                  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+                  EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+                  EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS }}
+                  SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+                  SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+                  SMTP_PORT: ${{ secrets.SMTP_PORT }}
+              run: |
+                  echo "Running arxiv daily workflow..."
+                  uv run python main.py
+                  echo "Execution finished."
+
+            - name: Show log tail
+              if: always()
+              run: |
+                  echo '---- logs/app.log (tail) ----'
+                  if [ -f logs/app.log ]; then tail -n 200 logs/app.log; else echo 'No log file.'; fi
+
+            - name: Upload generated markdown
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: daily-papers-md
+                  path: temp/*.md
+                  if-no-files-found: warn
+
+            - name: Upload generated pdf
+              uses: actions/upload-artifact@v4
+              with:
+                  name: daily-papers-pdf
+                  path: temp/*.pdf
+                  if-no-files-found: warn
+
+            - name: Upload processed id cache
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: processed-id-cache
+                  path: cache/processed_ids.json
+                  if-no-files-found: warn
+
+            - name: Clean up
+              if: always()
+              run: |
+                  echo "Workflow completed."
