@@ -57,7 +57,8 @@ def load_settings(pyproject_path: Path) -> tuple[ProjectMeta, AppConfig]:
     email_sender = os.getenv("EMAIL_SENDER", "")
     email_receivers = os.getenv("EMAIL_RECEIVERS", "")
     smtp_server = os.getenv("SMTP_SERVER", "")
-    smtp_port = int(os.getenv("SMTP_PORT", 587))
+    smtp_port_str = os.getenv("SMTP_PORT", "587")
+    smtp_port = int(smtp_port_str) if smtp_port_str.strip() else 587
     smtp_username = os.getenv("SMTP_USERNAME", "")
     app_cfg = AppConfig(
         timezone=tz,
