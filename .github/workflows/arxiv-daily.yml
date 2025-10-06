@@ -18,6 +18,16 @@ jobs:
     daily:
         name: Fetch & Recommend Papers
         runs-on: ubuntu-latest
+        env:
+            TZ: Asia/Shanghai
+            PYTHONUNBUFFERED: '1'
+            LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+            SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+            EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+            EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS }}
+            SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+            SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+            SMTP_PORT: ${{ secrets.SMTP_PORT }}
         permissions:
             contents: read
             actions: read
@@ -51,14 +61,6 @@ jobs:
                   ls -al
 
             - name: Run daily script
-              env:
-                  LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-                  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-                  EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
-                  EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS }}
-                  SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-                  SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
-                  SMTP_PORT: ${{ secrets.SMTP_PORT }}
               run: |
                   echo "Running arxiv daily workflow..."
                   uv run python main.py
