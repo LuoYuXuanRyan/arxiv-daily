@@ -70,11 +70,7 @@ jobs:
                   SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
                   SMTP_PORT: ${{ secrets.SMTP_PORT }}
               run: |
-                  python - <<'PY'
-                    import os, json
-                    keys = ["LLM_API_KEY","SMTP_PASSWORD","EMAIL_SENDER","EMAIL_RECEIVERS","SMTP_USERNAME","SMTP_SERVER","SMTP_PORT"]
-                    print(json.dumps({k: ("SET" if os.getenv(k) else "MISSING") for k in keys}, indent=2))
-                    PY
+                  python -c 'import os,json;keys=["LLM_API_KEY","SMTP_PASSWORD","EMAIL_SENDER","EMAIL_RECEIVERS","SMTP_USERNAME","SMTP_SERVER","SMTP_PORT"];print(json.dumps({k:("SET" if os.getenv(k) else "MISSING") for k in keys},indent=2))'
 
             - name: Run daily script
               run: |
