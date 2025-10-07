@@ -10,7 +10,7 @@ settings = load_settings(Path("pyproject.toml"))[1]
 
 logger = logging.getLogger(__name__)
 
-def construct_md_file(recommended_papers: dict[str, list[tuple[Paper, str]]]) -> str:
+def construct_md_file(recommended_papers: dict[str, list[tuple[Paper, str]]]) -> Path:
     current_date = datetime.now()
     current_date = to_timezone_time(current_date, settings.timezone).strftime("%Y-%m-%d")
     md_content = f"# New Papers in {current_date} \n\n"
@@ -34,9 +34,9 @@ def construct_md_file(recommended_papers: dict[str, list[tuple[Paper, str]]]) ->
     output_file = output_dir / f"new_papers_{current_date}.md"
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(md_content)
-    return str(output_file)
+    return output_file
 
-def construct_pdf_file(md_file_path: Path) -> None:
+def construct_pdf_file(md_file_path: Path) -> Path:
     if not md_file_path.exists() or not md_file_path.is_file():
         raise FileNotFoundError(f"Markdown file not found: {md_file_path}")
 
@@ -69,3 +69,4 @@ def construct_pdf_file(md_file_path: Path) -> None:
         )
 
     logger.info("PDF successfully generated at %s", output_pdf_path)
+    return output_pdf_path

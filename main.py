@@ -104,11 +104,15 @@ if __name__ == "__main__":
     if not recommended_papers:
         logging.info("No new recommended papers (all filtered or none matched).")
     md_file_path = construct_md_file(recommended_papers=recommended_papers)
+    pdf_file_path = None
     try:
-        construct_pdf_file(md_file_path=Path(md_file_path))
+        pdf_file_path = construct_pdf_file(md_file_path=md_file_path)
     except Exception as e:
         logging.warning(f"PDF generation failed: {e}")
-    send_email(attachment_paths=[Path(md_file_path)])
+    attachment_paths = [md_file_path]
+    if pdf_file_path is not None:
+        attachment_paths.append(pdf_file_path)
+    send_email(attachment_paths=attachment_paths)
     all_ids = [p.ID for p in all_papers]
     if all_ids:
         append_processed_ids(all_ids)
